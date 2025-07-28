@@ -1,3 +1,6 @@
+# نویسنده سورس : سید محمد حسین موسوی رجا
+# روبیکا : @O_and_ONE_01
+# تلگرام : @Hacker123457890
 from fast_rub import Client,Update,filters
 import json,random,httpx
 bot=Client("anymamus_bot")
@@ -104,3 +107,6 @@ async def main(message:Update):
                     save_file("i_send.json",i_send)
                     return None
 bot.run()
+# نویسنده سورس : سید محمد حسین موسوی رجا
+# روبیکا : @O_and_ONE_01
+# تلگرام : @Hacker123457890
