@@ -2,7 +2,7 @@
 # روبیکا : @O_and_ONE_01
 # تلگرام : @Hacker123457890
 from fast_rub import Client,Update,filters
-import json,random,httpx
+import json,random,httpx,fake_useragent
 bot=Client("anymamus_bot")
 def open_file(name_file,type_file="dict"):
     try:
@@ -25,16 +25,32 @@ ids=open_file("ids.json")
 i_send=open_file("i_send.json")
 warns=open_file("warns.json")
 bans=open_file("bans.json","list")
+list_bans=open_file("list_bans.json",type_file="list")
+CHAT_ID_owner="b0IS2Uw0DAc04aa76508d5d7640fa51f"
 def chek_fohsh(text:str):
     with httpx.Client() as cl:
-        return ((cl.get(f"http://api.parssource.ir/fohsh/?text={text}",timeout=30)).json())['result']['is_foshs']
+        kg=cl.get(f"https://api.parssource.ir/fohsh/?text={text}/",timeout=30,headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+    "Accept": "application/json",
+})
+        return ((kg).json())['result']['is_foshs']
 @bot.on_message_updates(filters=filters.is_user())
 async def main(message:Update):
     TEXT_MESSAGE=message.text
     CHAT_ID=message.chat_id
-    if CHAT_ID in bans:
+    GUID=message.sender_id
+    if (GUID in list_bans) or (CHAT_ID in list_bans) or (CHAT_ID in bans):
+        await bot.send_text(f"""✉️ پیام جدید از لیست ممنوعه ❌ :
+{str(message)}""",CHAT_ID_owner)
         return None
-    bot.add_commands('my_id',"آیدی شما برای ارسال چت ناشناس از بقیه به شما")
+    if CHAT_ID==CHAT_ID_owner and TEXT_MESSAGE.startswith("بن "):
+        c_g=TEXT_MESSAGE.replace("بن ","")
+        list_bans.append(c_g)
+        save_file("list_bans.json",list_bans)
+        await message.reply("کاربر با موفقیت بن شد ❌")
+    await bot.send_text(f"""✉️ پیام جدید :
+{str(message)}""",CHAT_ID_owner)
+    await bot.add_commands('my_id',"آیدی شما برای ارسال چت ناشناس از بقیه به شما")
     await bot.set_commands()
     await bot.delete_commands()
     if TEXT_MESSAGE in ['ربات','/start']:
@@ -52,10 +68,11 @@ async def main(message:Update):
             ids[CHAT_ID]=id_random
             save_file("ids.json",ids)
             save_file("list_ids.json",list_ids)
-        await message.reply(f"شناسه چت شما : /start?id={ids[CHAT_ID]}")
+        await message.reply("شناسه چت شما :")
+        await message.reply(f"/start?id={ids[CHAT_ID]}")
     elif TEXT_MESSAGE.startswith("/start?id="):
         id=TEXT_MESSAGE.replace("/start?id=","")
-        if id in list_ids:
+        if id in ids.values():
             if (CHAT_ID in ids)==False or (ids[CHAT_ID]!=id):
                 i_send[CHAT_ID]=id
                 save_file("i_send.json",i_send)
