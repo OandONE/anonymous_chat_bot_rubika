@@ -3,7 +3,7 @@
 # تلگرام : @Hacker123457890
 from fast_rub import Client,Update,filters
 import json,random,httpx
-bot=Client("anymamus_bott",token="BFBCF0IAKWMIUXVIFHSAHXGVHRMEHVIVEWZZSLNIORGMXQAAGIOTMTIPSASUHDWU")
+bot=Client("anymamus_bot")
 def open_file(name_file,type_file="dict"):
     try:
         with open(name_file,"r",encoding="utf-8") as file:
