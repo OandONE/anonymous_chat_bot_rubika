@@ -3,7 +3,7 @@
 # تلگرام : @Hacker123457890
 from fast_rub import Client,Update,filters
 import json,random,httpx
-bot=Client("anymamus_bot")
+bot=Client("anymamus_bott",token="BFBCF0IAKWMIUXVIFHSAHXGVHRMEHVIVEWZZSLNIORGMXQAAGIOTMTIPSASUHDWU")
 def open_file(name_file,type_file="dict"):
     try:
         with open(name_file,"r",encoding="utf-8") as file:
@@ -26,7 +26,7 @@ i_send=open_file("i_send.json")
 warns=open_file("warns.json")
 bans=open_file("bans.json","list")
 list_bans=open_file("list_bans.json",type_file="list")
-CHAT_ID_owner="b0IS2Uw0DAc04aa76508d5d7640fa51f"
+CHAT_ID_owner="b0IS2Uw0Eek07840197efdb0e0673d13"
 def chek_fohsh(text:str):
     with httpx.Client() as cl:
         kg=cl.get(f"https://api.parssource.ir/fohsh/?text={text}/",timeout=30,headers = {
@@ -53,6 +53,13 @@ async def main(message:Update):
     await bot.add_commands('my_id',"آیدی شما برای ارسال چت ناشناس از بقیه به شما")
     await bot.set_commands()
     await bot.delete_commands()
+    if TEXT_MESSAGE in ['اطلاعات من',"/about_me"]:
+        about_user=await bot.get_chat(CHAT_ID)
+        await message.reply(f"""چت آیدی » {CHAT_ID}
+شناسه گوید شما » {message.sender_id}
+نام شما : {about_user['data']['chat']['first_name']}
+{f"نام خانوادگی شما : {about_user['data']['chat']['last_name']}" if "last_name" in about_user['data']['chat'] else ""}
+{f"نام کاربری شما : @{about_user['data']['chat']['username']}" if "username" in about_user['data']['chat'] else ""}""")
     if TEXT_MESSAGE in ['ربات','/start']:
         await bot.add_listkeypad("100","Simple","شناسه چت من")
         await bot.send_message_keypad(CHAT_ID,"""سلام دوست عزیز 👋
@@ -68,8 +75,8 @@ async def main(message:Update):
             ids[CHAT_ID]=id_random
             save_file("ids.json",ids)
             save_file("list_ids.json",list_ids)
-        await message.reply("شناسه چت شما :")
-        await message.reply(f"/start?id={ids[CHAT_ID]}")
+        m=str((await message.reply("شناسه چت شما :"))['data']['message_id'])
+        await bot.send_text(f"/start?id={ids[CHAT_ID]}",message.chat_id,reply_to_message_id=m)
     elif TEXT_MESSAGE.startswith("/start?id="):
         id=TEXT_MESSAGE.replace("/start?id=","")
         if id in ids.values():
