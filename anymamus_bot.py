@@ -1,7 +1,11 @@
+# fast_rub : 1.4
+
 # نویسنده سورس : سید محمد حسین موسوی رجا
 # روبیکا : @O_and_ONE_01
 # تلگرام : @Hacker123457890
-from fast_rub import Client,Update,filters
+from fast_rub import Client,filters
+from fast_rub.type import Update
+from fast_rub.iniline import KeyPad
 import json,random,httpx
 bot=Client("anymamus_bot")
 def open_file(name_file,type_file="dict"):
@@ -26,13 +30,16 @@ i_send=open_file("i_send.json")
 warns=open_file("warns.json")
 bans=open_file("bans.json","list")
 list_bans=open_file("list_bans.json",type_file="list")
-CHAT_ID_owner="b0IS2Uw0Eek07840197efdb0e0673d13"
+
+
+CHAT_ID_owner="b0IS2Uw0Eek07840197efdb0e0673d13" # چت آیدی خود را در این متغیر وارد کنید . برای دریافت چت آیدی میتوانید سورس را ران کنید و دستور اطلاعات من را برای ربات ارسال کنید
+send_messages_to_owner = False # در صورتی که نمیخواهید پیام های کاربران برایتان ارسال شود مقدار این متغیر را برابر غلط کنید . در صورتی که مقدار متغیر غلط باشد سرعت ربات افزایش میابد
+user_name_owner = "@O_and_ONE_01" # نام کاربری خود را در این متغیر بنویسید
+
+
 def chek_fohsh(text:str):
     with httpx.Client() as cl:
-        kg=cl.get(f"https://api.parssource.ir/fohsh/?text={text}/",timeout=30,headers = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-    "Accept": "application/json",
-})
+        kg=cl.get(f"https://api.parssource.ir/fohsh/?text={text}/",timeout=30)
         return ((kg).json())['result']['is_foshs']
 @bot.on_message_updates(filters=filters.is_user())
 async def main(message:Update):
@@ -40,7 +47,8 @@ async def main(message:Update):
     CHAT_ID=message.chat_id
     GUID=message.sender_id
     if (GUID in list_bans) or (CHAT_ID in list_bans) or (CHAT_ID in bans):
-        await bot.send_text(f"""✉️ پیام جدید از لیست ممنوعه ❌ :
+        if send_messages_to_owner:
+            await bot.send_text(f"""✉️ پیام جدید از لیست ممنوعه ❌ :
 {str(message)}""",CHAT_ID_owner)
         return None
     if CHAT_ID==CHAT_ID_owner and TEXT_MESSAGE.startswith("بن "):
@@ -48,7 +56,8 @@ async def main(message:Update):
         list_bans.append(c_g)
         save_file("list_bans.json",list_bans)
         await message.reply("کاربر با موفقیت بن شد ❌")
-    await bot.send_text(f"""✉️ پیام جدید :
+    if send_messages_to_owner:
+        await bot.send_text(f"""✉️ پیام جدید :
 {str(message)}""",CHAT_ID_owner)
     await bot.add_commands('my_id',"آیدی شما برای ارسال چت ناشناس از بقیه به شما")
     await bot.set_commands()
@@ -60,17 +69,20 @@ async def main(message:Update):
 نام شما : {about_user['data']['chat']['first_name']}
 {f"نام خانوادگی شما : {about_user['data']['chat']['last_name']}" if "last_name" in about_user['data']['chat'] else ""}
 {f"نام کاربری شما : @{about_user['data']['chat']['username']}" if "username" in about_user['data']['chat'] else ""}""")
-    if TEXT_MESSAGE in ['ربات','/start']:
-        await bot.add_listkeypad("100","Simple","شناسه چت من")
-        await bot.send_message_keypad(CHAT_ID,"""سلام دوست عزیز 👋
+    if TEXT_MESSAGE in ['ربات','/start','بات']:
+        buttons = KeyPad()
+        buttons.add_1row("100","شناسه چت من")
+        await message.reply("""سلام دوست عزیز 👋
 برای ارسال پیام ناشناس لطفا شناسه چت ناشناس را مثل زیر وارد کنید :
-/start?id=1234567890""",reply_to_message_id=message.message_id)
-        await bot.delete_listkeypad()
+/start?id=1234567890""",buttons.get())
     elif TEXT_MESSAGE in ["/my_id","شناسه چت","شناسه چت من","شناسه چتم"]:
         if not (CHAT_ID in list_ids):
             id_random=""
             for t in range(10):
                 id_random+=str(random.randint(0,9))
+            while id_random in ids:
+                for t in range(10):
+                    id_random+=str(random.randint(0,9))
             list_ids.append(CHAT_ID)
             ids[CHAT_ID]=id_random
             save_file("ids.json",ids)
@@ -102,7 +114,7 @@ async def main(message:Update):
                     if warns[CHAT_ID]==3:
                         bans.append(CHAT_ID)
                         warns[CHAT_ID]=0
-                        await message.reply("شما به دلیل پر شدن اخطار هایتان از ربات بن شدید ❌ پشتیبانی ربات : @O_and_ONE_01")
+                        await message.reply(f"شما به دلیل پر شدن اخطار هایتان از ربات بن شدید ❌ پشتیبانی ربات : {user_name_owner}")
                     save_file("bans.json",bans)
                     save_file("warns.json",warns)
                     return None
@@ -117,7 +129,7 @@ async def main(message:Update):
                 if warns[CHAT_ID]==3:
                     bans.append(CHAT_ID)
                     warns[CHAT_ID]=0
-                    await message.reply("شما به دلیل پر شدن اخطار هایتان از ربات بن شدید ❌ پشتیبانی ربات : @O_and_ONE_01")
+                    await message.reply(f"شما به دلیل پر شدن اخطار هایتان از ربات بن شدید ❌ پشتیبانی ربات : {user_name_owner}")
                 save_file("bans.json",bans)
                 save_file("warns.json",warns)
                 return None
